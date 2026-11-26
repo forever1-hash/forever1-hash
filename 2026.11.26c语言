@@ -1,0 +1,232 @@
+第六次
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define N 5
+
+
+int main(void)
+{
+    int a[N][N] = {0},i = 0,j = 0;
+    for(i = 0;i < N;i++)
+        a[i][0] = a[i][i] = 1;
+    for(i = 2;i < N;i++)
+        for(j = 1;j < i;j++)
+        a[i][j] = a[i-1][j-1] + a[i-1][j];
+    for(i = 0;i < N;i++)
+    {
+        for(j = 0;j <= i;j++)
+            printf("%5d",a[i][j]);
+        printf("\n");
+    }
+    return 0;
+}
+
+
+
+int main(void)
+{
+    double a[4][6] = {0},sum = 0;
+    int i = 0,j = 0;
+    for(i = 0;i < 4;i++)
+        for(j = 0;j < 5;j++)
+            a[i][j] = i * j + 1;
+    for(i = 0;i < 4;i++)
+    {
+        sum = 0;
+        for(j = 0;j < 5;j++)
+            sum = sum + a[i][j];
+        a[i][5] = sum / 5;
+    }
+    for(i = 0; i < 4;i++)
+    {
+        for(j = 0;j < 6;j++)
+            printf("%5.1lf",a[i][j]);
+        printf("\n");
+    }
+    return 0;
+}
+
+
+
+
+int main(void)
+{
+    int a[N][N] = {0},i = 0,j = 0,k = 1,m = 0;
+    if(N % 2 ==0)
+        m = N / 2;
+    else
+        m = N / 2 + 1;
+    for(i = 0;i < m;i++)
+    {
+        for(j = i;j < N-i;j++)
+        {
+            a[i][j] = k;
+            k++;
+        }
+        for(j = i + 1;j < N-i;j++)
+        {
+            a[j][N-i-1] = k;
+            k++;
+        }
+        for(j = N-i-2;j >= i;j--)
+        {
+            a[N-i-1][j] = k;
+            k++;
+        }
+        for(j = N-i-2;j >= i+1;j--)
+        {
+            a[i][j] = k;
+            k++;
+        }
+        for(i = 0;i < N;i++)
+        {
+            for(j = 0;j < N;j++)
+                printf("%5d",a[i][j]);
+            printf("\n");
+        }
+    }
+    return 0;
+}
+
+
+
+
+int day_of_year(int year, int month,int day)
+{
+    int x, leap;
+    int tab[2][13]=
+    {
+        {0,31,28,31,30,31,30,31,31,30,31,30,31},
+        {0,31,29,31,30,31,30,31,31,30,31,30,31}
+    };
+    leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+    for(k = 1;k < month;k++)
+        day = day + tab[leap][k];
+    return day;
+}
+
+
+int main()
+{
+    int i,j;
+    int a[5][5],sum = 0;
+    for(i = 0;i < 5;i++)
+    {
+        for(j = 0;j < 5;j++)
+        {
+            a[i][j] = i + j;
+        }
+    }
+    for(i = 0;i < 5;i++)
+    {
+        for(j = 0;j < 5;j++)
+        {
+            if(i == j)
+            {
+                sum += a[i][j];
+            }
+        }
+    }
+    for(i = 0;i < 5;i++)
+    {
+        for(j = 0;j < 5;j++)
+        {
+            printf("%3d",a[i][j]);
+        }
+        printf("\n");
+    }
+    printf("主对角线之和为：");
+    return 0;
+}
+
+
+
+
+int main()
+{
+    int count;
+    int i;
+    char s[80];
+    gets(s);
+
+    while((s[i] = getchar())!='\n')
+        i++;
+    s[i] = '\0';
+    count = 0;
+    for(i = 0;s[i]!= '\0';i++)
+        if(s[i] <= 'z' && s[i] >= 'A')
+        count++;
+    printf("count = %d\n",count);
+
+    int n = 0;
+    for(i = 0; *(s+i)!='\0';i++)
+        if((s[i] <= 'z' && s[i] >= 'A')
+            n = n * 10 + (s[i] - 'A');
+    printf("n = %d\n ", lower);
+    return 0;
+}
+
+
+
+
+int main(void)
+{
+    char a[10] = "",b[10] = "";
+    gets(a);
+    scanf("%s",b);
+    puts(a);
+    printf("%s\n",b);
+    return 0;
+}
+
+
+
+int main(void)
+{
+    char a[80] = "";
+    int count = 0;
+    gets(a);
+    count = strlen(a);
+    printf("%s:%d\n",a,count);
+    return 0;
+}
+
+
+
+int main(void)
+{
+    char a[50] = "",b[80] = "";
+    gets(a);
+    strcpy(b,a);
+    puts(b);
+    return 0;
+}
+
+
+
+int main(void)
+{
+    char a[80] = "",b[30] = "";
+    gets(a);
+    gets(b);
+    strcat(a,b);
+    puts(a);
+    return 0;
+}
+
+
+
+int main(void)
+{
+    char a[30] = "",b[30] = "";
+    gets(a);
+    gets(b);
+    if(strcmp(a,b) > 0)
+        printf("First string > Second string\n");
+    if(strcmp(a,b) == 0)
+        printf("Equal\n");
+    if(strcmp(a,b) < 0)
+        printf("First string < Second string\n");
+    return 0;
+}
