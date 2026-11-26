@@ -1,0 +1,118 @@
+第5次提交
+绝对值最大
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int n;
+    while(scanf("%d",&n)!= EOF)
+    {
+        int max_val,temp;
+        scanf("%d",&max_val);
+        int max_a = abs(max_val);
+        for(int i = 1;i < n;i++)
+        {
+            scanf("%d",&temp);
+            if(abs(temp) > max_a)
+            {
+                max_a = abs(temp);
+                max_val = temp;
+            }
+        }
+        printf("%d\n",max_val);
+    }
+    return 0;
+}
+
+字符统计
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    char c;
+    int a = 0,b = 0,c2 = 0,d = 0;
+    while((c = getchar())!= EOF)
+    {
+        if(c == '\n')
+        {
+            printf("%d %d %d %d\n",a, b, c2, d);
+            a = 0;b = 0;c2 = 0;d = 0;
+        }
+        else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+            a++;
+        else if (c >= '0' && c <= '9')
+            b++;
+        else if (c == ' ')
+            c2++;
+        else
+            d++;
+    }
+    return 0;
+}
+
+商场促销打折
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    double amount;
+    while(scanf("%lf", &amount)!= EOF)
+    {
+        double pay;
+        if(amount < 500)
+        {
+            pay = amount * 0.88;
+        }else if (amount < 1000){
+            pay = amount * 0.80;
+        }else {
+            pay = amount * 0.70;
+            }
+            printf("%.f\n",pay);
+    }
+    return 0;
+}
+
+空心三角形
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    char ch[100];
+    int n[100];
+    int count = 0;
+    char line[100];
+
+    while(count < 100 && fgets(line, sizeof(line),stdin)!= NULL)
+    {
+        if(sscanf(line, " %c %d", &ch[count],&n[count]) == 2)
+        {
+        count++;
+        }
+    }
+    for (int t = 0;t < count; t++)
+    {
+        if (t > 0)
+            printf("\n");
+        for(int i = 1;i < n[t];i++)
+        {
+            for(int j = 0;j < n[t] - i;j++)
+                printf(" ");
+            printf("%c", ch[t]);
+            if(i > 1)
+            {
+                for(int j = 0;j < 2 * i - 3;j++)
+                    printf(" ");
+                printf("%c", ch[t]);
+            }
+            printf("\n");
+        }
+        for(int i = 0;i < 2 * n[t] - 1;i++)
+            printf("%c", ch[t]);
+        printf("\n");
+    }
+    return 0;
+}
