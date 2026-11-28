@@ -1,0 +1,215 @@
+def main():
+    pygame.init()
+    try:
+        info = pygame.display.Info()
+        desk_w, desk_h = info.current_w or BASE_W, info.current_h or BASE_H
+    except Exception:
+        desk_w, desk_h = BASE_W, BASE_H
+win_w = max(760, min(BASE_W, int(desk_w * 0.94)))
+win_h = max(520, min(BASE_H, int(desk_h * 0.88)))
+screen = pygame.display.set_mode((win_w, win_h), pygame.RESIZABLE)
+pygame.display.set_caption("粉色圣诞树 · 龙卷开场")
+layout(win_w, win_h)
+clock = pygame.time.Clock()
+font = pygame.font.Font(None, max(20, int(30 * max(S, 0.8))))
+sky = make_sky(WIDTH, HEIGHT)
+glow = make_glow()
+pts = build_points()
+star = build_star_shape()
+layer = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+BUCKETS = 56
+buckets = [[] for _ in range(BUCKETS)]
+yaw, pitch, zoom = 0.0, -0.32, 1.0
+t = 0.0
+dragging = False
+is_full = False
+running = True
+while running:
+    dt = min(clock.tick(FPS) / 1000.0, 0.05)
+t += dt
+yaw += dt * AUTO_SPIN * min(1.0, t / 2.0)
+if t < 3.0:
+    pitch = -0.32 + 0.20 * (t / 3.0)
+keys = pygame.key.get_pressed()
+if keys[pygame.K_LEFT]:
+    yaw -= dt * 2.2
+if keys[pygame.K_RIGHT]:
+    yaw += dt * 2.2
+if keys[pygame.K_UP]:
+    pitch = max(-0.8, pitch - dt * 1.4)
+if keys[pygame.K_DOWN]:
+    pitch = min(0.8, pitch + dt * 1.4)
+if keys[pygame.K_PLUS] or keys[pygame.K_EQUALS]:
+    zoom = min(1.9, zoom + dt * 0.9)
+if keys[pygame.K_MINUS]:
+    zoom = max(0.6, zoom - dt * 0.9)
+for event in pygame.event.get():
+    if event.type == pygame.QUIT:
+        running = False
+    elif event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_ESCAPE:
+            running = False
+    elif event.key == pygame.K_q:
+        running = False
+    elif event.key == pygame.K_F11:
+        is_full = not is_full
+        if is_full:
+            screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        else:
+            screen = pygame.display.set_mode((win_w, win_h), pygame.RESIZABLE)
+        layout(*screen.get_size())
+        sky = make_sky(WIDTH, HEIGHT)
+        layer = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    elif event.key == pygame.K_r:
+        t = 0.0
+        yaw, pitch, zoom = 0.0, -0.32, 1.0
+    elif event.type == pygame.MOUSEBUTTONDOWN:
+        if event.button == 1:
+            dragging = True
+    elif event.button == 4:
+        zoom = min(1.9, zoom + 0.08)
+    elif event.button == 5:
+        zoom = max(0.6, zoom - 0.08)
+    elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+        dragging = False
+    elif event.type == pygame.MOUSEMOTION and dragging:
+        yaw += event.rel[0] * 0.009
+    pitch = max(-0.8, min(0.8, pitch + event.rel[1] * 0.008))
+    elif event.type == pygame.VIDEORESIZE:
+    screen = pygame.display.set_mode((max(760, event.w), max(520, event.h)), pygame.RESIZABLE)
+    layout(*screen.get_size())
+    sky = make_sky(WIDTH, HEIGHT)
+    layer = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+screen.fill(BG)
+sky.set_alpha(int(255 * min(1.0, t / 0.9)))
+screen.blit(sky, (0, 0))
+cy_, sy_ = math.cos(yaw), math.sin(yaw)
+cp, sp = math.cos(pitch), math.sin(pitch)
+cam_d = 2.6 * TR_H
+target_y = TR_H * 0.42
+kz = K * zoom
+def proj(x, y, z):
+x1 = x \* cy\_ + z \* sy\_
+z1 = -x \* sy\_ + z \* cy\_
+y2 = y \* cp - z1 \* sp
+z2 = y \* sp + z1 \* cp
+zc = cam_d + z2
+if zc &lt; 40:
+    return None
+s\_ = cam_d / zc
+dep = 0.5 - z2 / (2.7 \* TR_R)
+dep = 0.0 if dep &lt; 0 else (1.0 if dep &gt; 1 else dep)
+return CX + x1 \* kz \* s\_, CY - (y2 - target_y) \* kz \* s\_, s\_, dep
+for b in buckets:
+b.clear()
+for (x, y, z, size, color, app, dur, r0, th0) in pts:
+if t &lt; app:
+    continue
+u = (t - app) / dur
+if u &gt;= 1.0:
+    qx, qy, qz = x, y, z
+    fresh = 1.0 - min(1.0, (t - app - dur) / 0.35)
+else:
+    e = 1.0 - (1.0 - u) \*\* 2.4
+    r_t = 20.0 + (r0 - 20.0) \* e
+    qy = -4.0 + (y + 4.0) \* e
+    th_t = th0 - (1.0 - e) \* 2.0
+    qx = math.cos(th_t) \* r_t
+    qz = math.sin(th_t) \* r_t
+    fresh = 1.0
+p = proj(qx, qy, qz)
+if p is None:
+    continue
+px, py, s\_, dep = p
+if T_IMPACT &lt; t &lt; T_IMPACT + 1.5:
+    k = (t - T_IMPACT) \* 620.0
+    pulse = 1.3 \* math.exp(-((k - (TR_H - y)) \*\* 2) / (2 \* 68.0 \*\* 2))
+else:
+    pulse = 0.0
+bright = (0.42 + 0.85 \* dep) \* (1.0 + pulse)
+c = (min(255, int((color\[0\] + 255 \* fresh \* 0.6) \* bright)),
+     min(255, int((color\[1\] + 255 \* fresh \* 0.6) \* bright)),
+     min(255, int((color\[2\] + 255 \* fresh \* 0.6) \* bright)))
+dsize = max(1, int(round(size \* (0.6 + 0.8 \* dep) \* s\_)))
+bi = int((1.0 - dep) \* (BUCKETS - 1))
+bi = 0 if bi &lt; 0 else (BUCKETS - 1 if bi &gt;= BUCKETS else bi)
+buckets\[bi\].append((int(px), int(py), dsize, c))
+layer.fill((0, 0, 0, 0))
+for bkt in buckets:
+for px, py, dsize, c in bkt:
+    layer.fill(c, (px, py, dsize, dsize))
+tip_y = TR_H + 24
+tip_sx = CX
+tip_sy = CY - (tip_y * cp - target_y) * kz
+if T_METEOR < t < T_IMPACT:
+prog = (t - T_METEOR) / (T_IMPACT - T_METEOR)
+e = prog \*\* 1.35
+sx0, sy0 = CX - 0.58 \* WIDTH, tip_sy - 0.10 \* HEIGHT
+for j in range(48):
+    ep = max(0.0, e - j \* 0.011)
+    mx = sx0 + (tip_sx - sx0) \* ep
+    my = sy0 + (tip_sy - sy0) \* ep
+    k = 1.0 - j / 48.0
+    d = max(1, int(4.2 \* k \* (0.6 + 0.4 \* prog)))
+    layer.fill((int(255 \* k), int(180 \* k), int(220 \* k)),
+               (int(mx), int(my), d, d))
+mx = sx0 + (tip_sx - sx0) \* e
+my = sy0 + (tip_sy - sy0) \* e
+layer.fill((255, 230, 245), (int(mx) - 3, int(my) - 3, 6, 6))
+if T_IMPACT < t < T_IMPACT + 1.25:
+k = (t - T_IMPACT) / 1.25
+rr = 60.0 + k \* TR_R \* 6.2
+fade = (1.0 - k) \*\* 1.8
+n = 200
+for i in range(n):
+    a2 = i / n \* math.pi \* 2
+    p = proj(math.cos(a2) \* rr, -2, math.sin(a2) \* rr)
+    if p is None:
+        continue
+    px, py, s\_, dep = p
+    d = max(1, int((2.6 - 1.4 \* k) \* s\_))
+    layer.fill((int(255 \* fade), int(170 \* fade), int(210 \* fade)),
+               (int(px), int(py), d, d))
+if t >= T_IMPACT:
+prog = min(1.0, (t - T_IMPACT) / 0.45)
+e = 1.0 - (1.0 - prog) \*\* 3
+tw = 40.0 \* (0.65 + 0.35 \* e) \* (1.0 + 0.05 \* math.sin(t \* 1.8))
+for hx, hy in star:
+    layer.fill((255, 255, 255),
+               (int(tip_sx + hx \* tw), int(tip_sy - hy \* tw), 2, 2))
+else:
+tw = 40.0 \* (0.65 + 0.35 \* min(1.0, max(0.0, (t - T_METEOR) / (T_IMPACT - T_METEOR))))
+screen.blit(layer, (0, 0))
+small = pygame.transform.smoothscale(layer, (WIDTH // 6, HEIGHT // 6))
+screen.blit(pygame.transform.smoothscale(small, (WIDTH, HEIGHT)), (0, 0),
+        special_flags=pygame.BLEND_ADD)
+if T_IMPACT <= t < T_IMPACT + 0.32:
+k = max(0.0, 1.0 - (t - T_IMPACT) / 0.32)
+flash = pygame.Surface((WIDTH, HEIGHT))
+flash.fill((255, 235, 245))
+flash.set_alpha(int(42 \* k \*\* 2.6))
+screen.blit(flash, (0, 0))
+if T_METEOR < t < T_IMPACT:
+prog = (t - T_METEOR) / (T_IMPACT - T_METEOR)
+e2 = prog \*\* 1.35
+sx0, sy0 = CX - 0.58 \* WIDTH, tip_sy - 0.10 \* HEIGHT
+gx = sx0 + (tip_sx - sx0) \* e2
+gy = sy0 + (tip_sy - sy0) \* e2
+gw = max(14, int(150 \* (0.4 + 0.6 \* prog)))
+g = pygame.transform.smoothscale(glow, (gw, gw)
+screen.blit(g, (int(gx - gw / 2), int(gy - gw / 2)), special_flags=pygame.BLEND_ADD)
+elif t >= T_IMPACT:
+gw = max(10, int(tw \* 4.4))
+g = pygame.transform.smoothscale(glow, (gw, gw))
+screen.blit(g, (int(tip_sx - gw / 2), int(tip_sy - gw / 2)),
+            special_flags=pygame.BLEND_ADD)
+pad = int(26 * max(S, 0.72))
+if t > T_IMPACT:
+txt = font.render("Merry Christmas", True, (255, 225, 240))
+txt.set_alpha(int(255 \* min(1.0, (t - T_IMPACT + 0.3) / 0.9)))
+screen.blit(txt, (pad, pad))
+pygame.display.flip()
+pygame.quit()
+sys.exit(0)
+if name == " main ":
+main()
